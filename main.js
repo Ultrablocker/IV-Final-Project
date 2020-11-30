@@ -1,5 +1,5 @@
-let margin = 300;
-let gap_between_views = 150;
+// let margin = 300;
+// let gap_between_views = 150;
 //Two functions used to pop elements on top or move to the back.
 d3.selection.prototype.moveToFront = function() {
   return this.each(function(){
@@ -17,10 +17,10 @@ d3.selection.prototype.moveToBack = function() {
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
 
 d3.json("china.json").then((data)=>{
-  let projection = d3.geoMercator();
   let svg = d3.select('svg');
-  let width = svg.attr("width") - margin;
-  let height = (svg.attr("height") - margin);
+  let width = svg.attr("width");
+  let height = svg.attr("height");
+  let projection = d3.geoMercator();
   let g = svg.append("g")
     .attr("transform", "translate(0,0)");
 
@@ -41,9 +41,10 @@ d3.json("china.json").then((data)=>{
   				.enter()
   				.append("path")
   				.attr("stroke", "#000")
+          .attr("transform", "translate(0, 0)")
   				.attr("stroke-width", 1)
   				.attr("fill", function (d, i) {
-  					return "green";
+  					return "red";
   				})
   				.attr("d", path)
   				.on("mouseover", function (d, i) {
