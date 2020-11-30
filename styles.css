@@ -72,3 +72,23 @@ div.tooltip {
   .slider.round:before {
     border-radius: 50%;
   }
+  body {
+      margin: 0px;
+  }
+  .sphere{
+      fill: lightgrey;
+  }
+
+  .countries {
+      fill: darkgrey;
+      stroke: black;
+  }
+
+  #map{
+    border: 3px solid rgb(13, 0, 128);
+    margin: 10px;
+    /* width: 50%;*/
+    /*float: right;*/
+    /*padding: 100px 100px 100px 100px; */
+    position: relative;
+}

@@ -16,11 +16,55 @@ d3.selection.prototype.moveToBack = function() {
         }
     });
 };
-let div = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
 
+d3.json("china.json").then((data)=>{
+  let projection = d3.geoMercator();
+  let svg = d3.select('svg');
+  let width = svg.attr("width") - margin;
+  let height = (svg.attr("height") - margin);
+  let g = svg.append("g")
+    .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+  // const countries = topojson.feature(data, data.objects.countries);
+
+  var pathGenerator = d3.geoPath()
+    .projection(projection)
+
+  svg.append('path')
+    .attr("class", "sphere")
+    .attr('d', pathGenerator());
+
+  // console.log(pathGenerator({type:'Sphere'}));
+  // const paths = svg.selectAll('path')
+  //   .data(countries.features);
+  // paths.enter().append('path')
+  //   .attr("class", "countries")
+  //   .attr('d', d => pathGenerator(d));
+path = d3.geoPath()
+				.projection(projection);
+
+  svg.selectAll("path")
+  				.data(data.features)
+  				.enter()
+  				.append("path")
+  				.attr("stroke", "#000")
+  				.attr("stroke-width", 1)
+  				.attr("fill", function (d, i) {
+  					return "green";
+  				})
+  				.attr("d", path)
+  				.on("mouseover", function (d, i) {
+  					d3.select(this)
+  						.attr("fill", "yellow");
+            console.log(i.properties);
+  				})
+  				.on("mouseout", function (d, i) {
+  					d3.select(this)
+  						.attr("fill", "red");
+  				});
+
+});
 // var slider = document.getElementById("slider");
 
 
@@ -239,4 +283,4 @@ var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
 //       }
 //
 //   }
-)
+// )

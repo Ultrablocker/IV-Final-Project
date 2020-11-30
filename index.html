@@ -4,6 +4,8 @@
         <title>FQI China</title>
         <link rel="stylesheet" href="styles.css">
         <script src="https://d3js.org/d3.v6.min.js"></script>
+        <script src="//d3js.org/topojson.v1.min.js"></script>
+        <script src="https://d3js.org/d3-geo-projection.v3.min.js"></script>
     </head>
     <body>
         <div>
@@ -12,7 +14,9 @@
           <span class="slider"></span>
           </label>
         </div>
-        <svg width="800" height="900"></svg>
+        <div id="map">
+        <svg width="1500" height="600"></svg>
         <script src="main.js"></script>
+      </div>
     </body>
 </html>
