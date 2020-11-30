@@ -1,5 +1,3 @@
-//HW3 Bonus
-//Xu Zhu
 let margin = 300;
 let gap_between_views = 150;
 //Two functions used to pop elements on top or move to the back.
