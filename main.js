@@ -17,6 +17,13 @@ d3.selection.prototype.moveToBack = function() {
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
 
 d3.json("china.json").then((data)=>{
+<<<<<<< HEAD
+=======
+  let projection = d3.geoMercator()
+    .scale(600)
+    .center([110,40])
+    // .translate([0,500]);
+>>>>>>> c0058319fd46ef17bac797ad3136eca2eadfe476
   let svg = d3.select('svg');
   let width = svg.attr("width");
   let height = svg.attr("height");
