@@ -24,16 +24,10 @@ d3.json("china.json").then((data)=>{
   let width = svg.attr("width") - margin;
   let height = (svg.attr("height") - margin);
   let g = svg.append("g")
-    .attr("transform", "translate(" + 100 + "," + 100 + ")");
+    .attr("transform", "translate(0,0)");
 
   // const countries = topojson.feature(data, data.objects.countries);
 
-  var pathGenerator = d3.geoPath()
-    .projection(projection)
-
-  svg.append('path')
-    .attr("class", "sphere")
-    .attr('d', pathGenerator());
 
   // console.log(pathGenerator({type:'Sphere'}));
   // const paths = svg.selectAll('path')
@@ -41,7 +35,7 @@ d3.json("china.json").then((data)=>{
   // paths.enter().append('path')
   //   .attr("class", "countries")
   //   .attr('d', d => pathGenerator(d));
-path = d3.geoPath()
+  path = d3.geoPath()
 				.projection(projection);
 
   svg.selectAll("path")
