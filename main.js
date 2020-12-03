@@ -1,7 +1,8 @@
-// let margin = 300;
+let margin = 100;
 // let gap_between_views = 150;
-let svg = d3.select('svg');
-let svg1 = d3.select('svg');
+let svg = d3.select('svg')
+let width = svg.attr("width") - margin ;
+let height = (svg.attr("height") - margin);
 var parseDate = d3.timeParse("%Y-%m-%d");
 let g1 = svg.append("g")
                     .attr("transform", "translate(" + 100 + "," + 100 + ")");
@@ -43,8 +44,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
   console.log(fqi);
   let projection = d3.geoMercator()
-    .scale(450)
-    .center([130,35])
+    .scale(600)
+    .center([115,40])
     // .translate([0,500]);
 
   // let projection = d3.geoMercator();
@@ -103,56 +104,126 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       g1.selectAll("#"+cur_city).raise().style("stroke","steelblue").style('opacity',0.1);
     });
     
-    var margin_l = {top: 20, right: 30, bottom: 30, left: 100},
-        width_l = 1000 - margin_l.left - margin_l.right,
-        height_l = 300 - margin_l.top - margin_l.bottom;
-      
-      var xScale= d3.scaleTime()
-          .domain(d3.extent(fqi, function(d) { return d.date; }))
-          .range([ map_width, width_l ]);
-      // var xScale = d3.scaleBand()
-      //     .domain(data.map(function(d) { return d.Date; }))
-      //     .rangeRound([0, width], .05).padding(0.5);
-      g1.append("g")
-        .attr("transform", "translate(0," + height_l + ")")
-        .call(d3.axisBottom(xScale));
-      // Add Y axis
-      var yScale = d3.scaleSqrt()
-        .domain([0, d3.max(fqi, function(d) { return d.pm25; })])
-        .range([ height_l, 0]);
-      g1.append("g")
-        .attr("transform", "translate("+map_width+"," + 0 + ")")
-        .call(d3.axisLeft(yScale));
+    var margin_l = {top: 20, right: 50, bottom: 500, left: 100},
+        width_l = width - margin_l.left - margin_l.right,
+        height_l = height - margin_l.top - margin_l.bottom;
+        console.log(width_l)  
+    // var xScale= d3.scaleTime()
+    //     .domain(d3.extent(fqi, function(d) { return d.date; }))
+    //     .range([ map_width, width_l ]);
     
-    city.forEach(x => {
-      draw_l(fqi,x.city)
-  });
+    var xScale = d3.scaleTime()
+    .domain(d3.extent(fqi, function(d) { return d.date; }))
+    .range([ map_width, width_l ]);
+    // var xScale = d3.scaleBand()
+    //     .domain(data.map(function(d) { return d.Date; }))
+    //     .rangeRound([0, width], .05).padding(0.5);
+    xAxis = g1.append("g")
+      .attr("transform", "translate(0," + height_l + ")")
+      .call(d3.axisBottom(xScale));
+    // Add Y axis
+    var yScale = d3.scaleLinear()
+      .domain([0, d3.max(fqi, function(d) { return d.pm25; })])
+      .range([ height_l, 0]);
+    yAxis = g1.append("g")
+      .attr("transform", "translate("+map_width+"," + 0 + ")")
+      .call(d3.axisLeft(yScale));
+  
+    draw_l(fqi,city)
 
-    function draw_l(data,city){
+    function draw_l(fqi,city){
+
+
+
+      // Add a clipPath: everything out of this area won't be drawn.
+      var clip = g1.append("defs").append("svg:clipPath")
+      .attr("id", "clip")
+      .append("svg:rect")
+      .attr("width", width_l-map_width )
+      .attr("height", height_l )
+      .attr("x", map_width)
+      .attr("y", 0);
+
+      // Add brushing
+      var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+          .extent( [ [map_width,0], [width_l,height_l] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+          .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+
+      // Create the line variable: where both the line and the brush take place
+      var line = g1.append('g')
+        .attr("clip-path", "url(#clip)")
+
       
       //Add the line
-      g1.append("path")
-        .datum(data.filter((d)=>{return d.city === city;}))
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1.5)
-        .style('opacity',0.1 )
-        .attr('id', function(d){
-          console.log(d[0].city)
-          return d[0].city})
+      city.forEach(x => {
+        
+      
+        line.append("path")
+          .datum(fqi.filter((d)=>{return d.city === x.city;}))
+          .attr("class", "line") 
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("stroke-width", 1.5)
+          .style('opacity',0.1 )
+          .attr('id', function(d){
+            // console.log(d[0].city)
+            return d[0].city})
+          .attr("d", d3.line()
+            .x(function(d) { return xScale(d.date) })
+            .y(function(d) { return yScale(d.pm25) })
+            )
+        });
+      
+      // Add the brushing
+      line
+      .append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+      // A function that set idleTimeOut to null
+      var idleTimeout
+      function idled() { idleTimeout = null; }
+
+       // A function that update the chart for given boundaries
+       function updateChart(event) {
+       // What are the selected boundaries?
+        extent = event.selection
+
+        // If no selection, back to initial coordinate. Otherwise, update X axis domain
+        if(!event.selection){
+          if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+          xScale.domain([ 4,8])
+        }else{
+          xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ])
+          line.selectAll(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+        }
+        // Update axis and line position
+      xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
+      line
+          .selectAll('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", d3.line()
+            .x(function(d) { return xScale(d.date) })
+            .y(function(d) { return yScale(d.pm25) })
+          )
+    
+      }
+
+      // If user double click, reinitialize the chart
+      svg.on("dblclick",function(){
+      xScale.domain(d3.extent(fqi, function(d) { return d.date; }))
+      xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
+      line
+        .selectAll('.line')
+        .transition()
+        .duration(1000)
         .attr("d", d3.line()
           .x(function(d) { return xScale(d.date) })
           .y(function(d) { return yScale(d.pm25) })
-          )
-      
-      // g1.selectAll("bar")
-      //     .data(data)
-      //   .enter().append("rect")
-      //     .style("fill", 'steelblue')
-      //     .attr("x", function(d) { return xScale(d.Date); })
-      //     .attr("width", xScale.bandwidth())
-      //     .attr("y", function(d) { return yScale(d.pm25); })
-      //     .attr("height", function(d) { return height - yScale(d.pm25); });
+        )
+      });
     }
+        
 
 });
