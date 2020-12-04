@@ -83,12 +83,31 @@ div.tooltip {
       fill: darkgrey;
       stroke: black;
   }
+  .month {
+      fill: none;
+      stroke: #000;
+      stroke-width: 2px;
+  }
+  .day {
+      fill: #fff;
+      stroke: #ccc;
+  }
+  text    {
+      font-family:sans-serif;
+      font-size:1.5em;
+  }
+  .dayLabel   {
+      fill:#aaa;
+      font-size:0.8em;
+  }
+  .monthLabel {
+      text-anchor:middle;
+      font-size:0.8em;
+      fill:#aaa;
+  }
+  .yearLabel  {
+      fill:#aaa;
+      font-size:1.2em;
+  }
 
-  #map{
-    border: 3px solid rgb(13, 0, 128);
-    margin: 10px;
-    /* width: 50%;*/
-    /*float: right;*/
-    /*padding: 100px 100px 100px 100px; */
-    position: relative;
-}
+  .key    {font-size:0.5em;}
