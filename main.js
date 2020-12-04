@@ -101,7 +101,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       d3.select(this)
         .style("fill", "red")
         .style("r", "3px");
-      g1.selectAll("#"+cur_city).raise().style("stroke","steelblue").style('opacity',0.1);
+      g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('opacity',0.1);
     });
     
     var margin_l = {top: 20, right: 50, bottom: 500, left: 100},
@@ -133,6 +133,23 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
     function draw_l(fqi,city){
 
+      // Set the gradient
+      svg.append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("y1", yScale(0))
+      .attr("x2", 0)
+      .attr("y2", yScale(d3.max(fqi, function(d) { return d.pm25; })
+      ))
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "lightgreen"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
 
 
       // Add a clipPath: everything out of this area won't be drawn.
@@ -162,9 +179,9 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .datum(fqi.filter((d)=>{return d.city === x.city;}))
           .attr("class", "line") 
           .attr("fill", "none")
-          .attr("stroke", "steelblue")
+          .attr("stroke", "url(#line-gradient)")
           .attr("stroke-width", 1.5)
-          .style('opacity',0.1 )
+          .style('opacity',0.5 )
           .attr('id', function(d){
             // console.log(d[0].city)
             return d[0].city})
@@ -194,26 +211,27 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
           xScale.domain([ 4,8])
         }else{
+          console.log(extent)
           xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ])
           line.selectAll(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
         }
         // Update axis and line position
-      xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
-      line
-          .selectAll('.line')
-          .transition()
-          .duration(1000)
-          .attr("d", d3.line()
-            .x(function(d) { return xScale(d.date) })
-            .y(function(d) { return yScale(d.pm25) })
-          )
+        xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
+        line
+            .selectAll('.line')
+            .transition()
+            .duration(1000)
+            .attr("d", d3.line()
+              .x(function(d) { return xScale(d.date) })
+              .y(function(d) { return yScale(d.pm25) })
+            )
     
       }
 
       // If user double click, reinitialize the chart
       svg.on("dblclick",function(){
       xScale.domain(d3.extent(fqi, function(d) { return d.date; }))
-      xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
+      xAxis.transition().call(d3.axisBottom(xScale))
       line
         .selectAll('.line')
         .transition()
