@@ -360,7 +360,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           })
           .attr("y", function(d) { return calY+(d.getDay() * cellSize); })
           .datum(format)
-          .style("fill", function (d,i) { console.log(data[i]['pm25']);
+          .style("fill", function (d,i) {
             return colorScaleRainbow(colorInterpolateRainbow(data[i]['pm25'])) });
 
       //create day labels
@@ -376,49 +376,47 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       })
 
       //let's draw the data on
-      var dataRects = cals.append("g")
-          .attr("id","dataDays")
-          .selectAll(".dataday")
-          .data(function(d){
-              console.log(d);
-              return d.pm25;
-          })
-          .enter()
-          .append("rect")
-          .attr("id",function(d) {
-              return format(d.date)+":"+d[1];
-          })
-          .attr("stroke","#ccc")
-          .attr("width",cellSize)
-          .attr("height",cellSize)
-          .attr("x", function(d){return xOffset+calX+(d3.timeWeek.count(d.date) * cellSize);})
-          .attr("y", function(d) { return calY+(d.date.getDay() * cellSize); })
-          .attr("fill", function(d) {
-              if (d[1]<breaks[0]) {
-                  return colours[0];
-              }
-              for (i=0;i<breaks.length+1;i++){
-                  if (d[1]>=breaks[i]&&d[1]<breaks[i+1]){
-                      return colours[i];
-                  }
-              }
-              if (d[1]>breaks.length-1){
-                  return colours[breaks.length]
-              }
-          })
+      // var dataRects = cals.append("g")
+      //     .attr("id","dataDays")
+      //     .selectAll(".dataday")
+      //     .data(function(d){
+      //         console.log(d);
+      //         return d.pm25;
+      //     })
+      //     .enter()
+      //     .append("rect")
+      //     .attr("id",function(d) {
+      //         return format(d.date)+":"+d[1];
+      //     })
+      //     .attr("stroke","#ccc")
+      //     .attr("width",cellSize)
+      //     .attr("height",cellSize)
+      //     .attr("x", function(d){return xOffset+calX+(d3.timeWeek.count(d.date) * cellSize);})
+      //     .attr("y", function(d) { return calY+(d.date.getDay() * cellSize); })
+      //     .attr("fill", function(d) {
+      //         if (d[1]<breaks[0]) {
+      //             return colours[0];
+      //         }
+      //         for (i=0;i<breaks.length+1;i++){
+      //             if (d[1]>=breaks[i]&&d[1]<breaks[i+1]){
+      //                 return colours[i];
+      //             }
+      //         }
+      //         if (d[1]>breaks.length-1){
+      //             return colours[breaks.length]
+      //         }
+      //     })
 
       //append a title element to give basic mouseover info
-      dataRects.append("title")
-          .text(function(d) { return toolDate(d.date)+":\n"+d[1]+units; });
+      rects.append("title")
+          .text(function(d, i) { return i.date + ' ' + i.pm25; });
 
       //add montly outlines for calendar
       cals.append("g")
       .attr("id","monthOutlines")
       .selectAll(".month")
-      .data(function(d) {
-          return d3.time.months(new Date(parseInt(d[0]), 0, 1),
-                                new Date(parseInt(d[0]) + 1, 0, 1));
-      })
+      .data(function(d) { console.log(d3.timeMonths(new Date(parseInt(d[0]), 0, 1), new Date(parseInt(d[0]), 8, 1)));
+        return d3.timeMonths(new Date(parseInt(d[0]), 3, 1), new Date(parseInt(d[0]), 8, 1))})
       .enter().append("path")
       .attr("class", "month")
       .attr("transform","translate("+(xOffset+calX)+","+calY+")")
@@ -428,7 +426,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       // console.log(document.getElementById("monthOutlines"));
       var BB = new Array();
-      var mp = d3.select('#monthOutlines');
+      var mp = d3.select('#monthOutlines').node();
       console.log(mp);
       for (var i=0;i<mp.length;i++){
           BB.push(mp[i].getBBox());
@@ -439,7 +437,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           boxCentre = d.width/2;
           monthX.push(xOffset+calX+d.x+boxCentre);
       })
-
+      console.log(monthX);
       //create centred month labels around the bounding box of each month path
       //create day labels
       var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -492,14 +490,20 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
   //pure Bostock - compute and return monthly path data for any year
   function monthPath(t0) {
-    var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
-        d0 = t0.getDay(), w0 = d3.timeWeek.count(t0),
-        d1 = t1.getDay(), w1 = d3.timeWeek.count(t1);
+    var year = 2020;
+    var month = d3.timeMonth.count(d3.timeYear(t0), t0);
+    var t1 = new Date(year, month+1, 0);
+    console.log(t1);
+    var d0 = d3.timeDay.count(d3.timeSunday(t0), t0);
+    var w0 = d3.timeSunday.count(d3.timeYear(t0), t0);
+    var d1 = d3.timeDay.count(d3.timeSunday(t1), t1);
+    var w1 = d3.timeSunday.count(d3.timeYear(t1), t1);
+    console.log((w0 + 1) * cellSize, d0 * cellSize, w0 * cellSize, 7 * cellSize, w1 * cellSize, (d1 + 1) * cellSize);
     return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
-        + "H" + w0 * cellSize + "V" + 7 * cellSize
-        + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
-        + "H" + (w1 + 1) * cellSize + "V" + 0
-        + "H" + (w0 + 1) * cellSize + "Z";
+          + "H" + w0 * cellSize + "V" + 7 * cellSize
+          + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
+          + "H" + (w1 + 1) * cellSize + "V" + 0
+          + "H" + (w0 + 1) * cellSize + "Z";
   }
 }
 });
