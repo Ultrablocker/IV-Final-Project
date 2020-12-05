@@ -1,6 +1,7 @@
 let margin = 100;
 // let gap_between_views = 150;
-let svg = d3.select('svg')
+let svg = d3.select('#svg_m');
+let svg_h = d3.select('#svg_h');
 let width = svg.attr("width") - margin ;
 let height = (svg.attr("height") - margin);
 var parseDate = d3.timeParse("%Y-%m-%d");
@@ -9,7 +10,6 @@ let g1 = svg.append("g")
 let g = svg.append("g")
 
 var defs = svg.append("defs");
-
 
 
 Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv")
@@ -113,23 +113,36 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         .style("r", "3px");
       g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.3);
     });
+    function update(id){
+      if(d3.select(id).property("checked")){
 
-    draw_h(fqi,city, 'Harbin', 'pm25');
-    
-    
-  
-    draw_l(fqi,city,'hum')
+        id = id.slice(1, -6);
+        console.log(id);
+        draw_h(fqi,city, 'Harbin', id);
+        draw_l(fqi,city, id);
+      }
+    };
+    d3.select('#ws_check').on('change', function(event, d) {update('#ws_check')});
+    d3.select('#hum_check').on('change', function(event, d) {update('#hum_check')});
+    d3.select('#dew_check').on('change', function(event, d) {update('#dew_check')});
+    d3.select('#pm25_check').on('change', function(event, d) {update('#pm25_check')});
+
+
+
+    draw_h(fqi,city, 'Harbin', 'hum');
+    draw_l(fqi,city,'hum');
 
     function draw_l(fqi,city,feature){
-      var margin_l = {top: 20, right: 50, bottom: 500, left: 100},
+      g1.selectAll("*").remove();
+      var margin_l = {top: 20, right: 50, bottom: 100, left: 100},
         width_l = width - margin_l.left - margin_l.right,
         height_l = height - margin_l.top - margin_l.bottom;
-        console.log(width_l)  
-        
+        console.log(width_l)
+
       // var xScale= d3.scaleTime()
       //     .domain(d3.extent(fqi, function(d) { return d.date; }))
       //     .range([ map_width, width_l ]);
-      
+
       var xScale = d3.scaleTime()
       .domain(d3.extent(fqi, function(d) { return d.date; }))
       .range([ map_width, width_l ]);
@@ -204,11 +217,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("d", d3.line()
             .x(function(d) { return xScale(d.date) })
             .y(function(d) { return yScale(d[feature]) })
-            
-            
+
+
           )
-          
-          
+
+
         });
 
       line.selectAll('.line')
@@ -220,10 +233,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .style('stroke', "red")
           .style('stroke-width','4')
           .style("opacity",'1');
-        
+
         // draw_l(fqi,cur_city)
-      
-          
+
+
         // console.log(i.properties);
       })
       .on("mouseout",function (event, d) {
@@ -234,10 +247,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .style('stroke', "url(#line-gradient)")
           .style('stroke-width','1.5')
           .style("opacity",'0.3')
-        
+
         // draw_l(fqi,cur_city)
-      
-          
+
+
         // console.log(i.properties);
       })
 
@@ -273,11 +286,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
         // If user double click, reinitialize the chart
         svg.on("dblclick",function(){
-            
+
             xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]);
             zoom()
             });
-    
+
       }
 
       function zoom(){
@@ -291,11 +304,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
               )
       }
 
-      
+
     }
 
     function draw_h(fqi, city, cur_city, feature){
-
+      svg_h.selectAll("*").remove();
       ///////////////////////////////////////////////////////////////////////////
       //////////// Get continuous color scale for the Rainbow ///////////////////
       ///////////////////////////////////////////////////////////////////////////
@@ -347,9 +360,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       toolDate = d3.timeFormat("%d/%b/%y");
 
       var yearlyData = d3.group(data, d => d.year);
-
-      var svg_h = d3.select("body").append("svg")
-         .attr("width","1000", 'height', '1000')
+      svg_h
          .attr("transform", "translate(" + 100 + "," + 200 + ")")
          .attr("viewBox","0 0 "+(xOffset+width)+" 1000");
 
@@ -417,37 +428,6 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .text(d);
       })
 
-      //let's draw the data on
-      // var dataRects = cals.append("g")
-      //     .attr("id","dataDays")
-      //     .selectAll(".dataday")
-      //     .data(function(d){
-      //         console.log(d);
-      //         return d.pm25;
-      //     })
-      //     .enter()
-      //     .append("rect")
-      //     .attr("id",function(d) {
-      //         return format(d.date)+":"+d[1];
-      //     })
-      //     .attr("stroke","#ccc")
-      //     .attr("width",cellSize)
-      //     .attr("height",cellSize)
-      //     .attr("x", function(d){return xOffset+calX+(d3.timeWeek.count(d.date) * cellSize);})
-      //     .attr("y", function(d) { return calY+(d.date.getDay() * cellSize); })
-      //     .attr("fill", function(d) {
-      //         if (d[1]<breaks[0]) {
-      //             return colours[0];
-      //         }
-      //         for (i=0;i<breaks.length+1;i++){
-      //             if (d[1]>=breaks[i]&&d[1]<breaks[i+1]){
-      //                 return colours[i];
-      //             }
-      //         }
-      //         if (d[1]>breaks.length-1){
-      //             return colours[breaks.length]
-      //         }
-      //     })
 
       //append a title element to give basic mouseover info
 
@@ -490,44 +470,6 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("y",calY/1.2)
           .text(d);
       })
-
-       //create key
-      // var key = svg.append("g")
-      //     .attr("id","key")
-      //     .attr("class","key")
-      //     .attr("transform",function(d){
-      //         return "translate("+xOffset+","+(yOffset-(cellSize*1.5))+")";
-      //     });
-      //
-      // key.selectAll("rect")
-      //     .data(colours)
-      //     .enter()
-      //     .append("rect")
-      //     .attr("width",cellSize)
-      //     .attr("height",cellSize)
-      //     .attr("x",function(d,i){
-      //         return i*130;
-      //     })
-      //     .attr("fill",function(d){
-      //         return d;
-      //     });
-      //
-      // key.selectAll("text")
-      //     .data(colours)
-      //     .enter()
-      //     .append("text")
-      //     .attr("x",function(d,i){
-      //         return cellSize+5+(i*130);
-      //     })
-      //     .attr("y","1em")
-      //     .text(function(d,i){
-      //         if (i<colours.length-1){
-      //             return "up to "+breaks[i];
-      //         }   else    {
-      //             return "over "+breaks[i-1];
-      //         }
-      //     });
-
 
   //pure Bostock - compute and return monthly path data for any year
   function monthPath(t0) {
