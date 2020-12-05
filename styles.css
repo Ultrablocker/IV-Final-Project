@@ -10,6 +10,14 @@ div.tooltip {
     border-radius: 8px;
     pointer-events: none;
   }
+
+  body {
+  		  	font-size: 1rem;
+  		  	font-family: 'Open Sans', sans-serif;
+  		  	font-weight: 500;
+  		  	fill: #7A7A7A;
+  		  	text-align: center;
+  		}
   /* The switch - the box around the slider */
   .switch {
     position: relative;
