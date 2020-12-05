@@ -84,11 +84,5 @@ div.tooltip {
       stroke: black;
   }
 
-  #map{
-    border: 3px solid rgb(13, 0, 128);
-    margin: 10px;
-    /* width: 50%;*/
-    /*float: right;*/
-    /*padding: 100px 100px 100px 100px; */
-    position: relative;
+  
 }
