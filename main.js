@@ -20,7 +20,9 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
   fqi = data[2]
 
   i = 0;
-  parseDate = d3.timeParse("%Y/%m/%d");
+  parseDate = d3.timeParse("%m/%d/%Y");
+  let cur_city = 'Shenyang';
+
   fqi.forEach(x => {
         i += 1;
         //unique id for each data point
@@ -32,6 +34,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         x.dew = parseInt(x.dew);
         x.pm25 = parseInt(x.pm25);
         x.year=x.date.getFullYear();
+        x.fqi_cum = parseInt(x.fqi_cum);
   });
 
   city.forEach(x => {
@@ -100,50 +103,31 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         .transition()
         .style("fill", "white")
         .style('r', '5')
-
-      // draw_l(fqi,cur_city)
-
-
-      // // console.log(i.properties);
+    })
+    .on("click", function (event, d) {
+      cur_city = this.id;
+      draw_h(fqi, city, cur_city ,d3.selectAll("input[name='var_radio']:checked").node().value)
     })
     .on("mouseout", function (d, i) {
-      let cur_city = this.id
+      cur_city = this.id
       d3.select(this)
         .style("fill", "red")
         .style("r", "3px");
       g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.3);
     });
-    var ids = new Array();
-    ids.push('ws');
-    function update(id){
-      if(d3.select(id).property("checked")){
 
-        id = id.slice(1, -6);
-        ids.push(id);
-        // // console.log(ids);
-        draw_h(fqi,city, 'Harbin', id);
-        draw_l(fqi,city, id);
-      }
-      else {
-        id = id.slice(1, -6);
-        var index = ids.indexOf(id);
-        if (index > -1) {
-          ids.splice(index, 1);
-        }
-        // // console.log(ids);
-        // draw_h(fqi,city, 'Harbin', id);
-        // draw_l(fqi,city, id);
-      }
+    function update(id, cur_city){
+      draw_h(fqi,city, cur_city, id);
+      draw_l(fqi,city, id);
     };
-    d3.select('#ws_check').on('change', function(event, d) {update('#ws_check')});
-    d3.select('#hum_check').on('change', function(event, d) {update('#hum_check')});
-    d3.select('#dew_check').on('change', function(event, d) {update('#dew_check')});
-    d3.select('#pm25_check').on('change', function(event, d) {update('#pm25_check')});
+
+    d3.selectAll("input[name='var_radio']").on("change", function(event, d){
+      update(this.value, cur_city)
+    });
 
 
-
-    draw_h(fqi,city, 'Harbin', 'ws');
-    draw_l(fqi,city,'ws');
+    // draw_h(fqi,city, 'Harbin', 'ws');
+    // draw_l(fqi,city,'ws');
 
     function draw_l(fqi,city,feature){
       g1.selectAll("*").remove();
@@ -328,6 +312,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       var coloursRainbow = ["#2c7bb6", "#00a6ca","#00ccbc","#90eb9d","#ffff8c","#f9d057","#f29e2e","#e76818","#d7191c"];
       var colourRangeRainbow = d3.range(0, 1, 1.0 / (coloursRainbow.length - 1));
+      // var colourRangeRainbow = [0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.8];
       colourRangeRainbow.push(1);
 
       //Create color gradient
@@ -356,7 +341,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         .attr("offset", function(d,i) { return i/(coloursRainbow.length-1); })
         .attr("stop-color", function(d) { return d; });
 
-      var title="FQI";
+      var title='Condition by Day in the Past Five Months';
       var units= cur_city;
 
 
@@ -381,6 +366,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         .attr("x",xOffset)
         .attr("y",20)
         .text(title);
+      svg_h.append("text")
+        .attr("x",xOffset)
+        .attr("y",40)
+        .text(cur_city);
 
       var cals = svg_h.selectAll("g")
         .data(yearlyData)

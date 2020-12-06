@@ -20,33 +20,56 @@
       <div class="w3-sidebar w3-light-grey w3-bar-block" style="width:25%">
         <h3 class="w3-bar-item">Select Variables</h3>
         <li class="list-group-item">
-            Windspeed
-            <label class="checkbox">
-                <input type="checkbox" id="ws_check" checked/>
-                <span class="success"></span>
+          <label class="radio radio-gradient">
+            <label class="radio__input">
+                <input type="radio" id="ws_check" name='var_radio' value='ws'/>
+                <span class="radio__control"></span>
+
+            </label>
+            <span class="radio__label">Windspeed</span>
             </label>
         </li>
         <li class="list-group-item">
-            Humidity
-            <label class="checkbox">
-                <input type="checkbox"  id='hum_check'/>
-                <span class="success"></span>
+          <label class="radio radio-gradient">
+            <label class="radio__input">
+                <input type="radio"  id='hum_check' name='var_radio' value='hum'/>
+                <span class="radio__control"></span>
+
+            </label>
+            <span class="radio__label">Humidity</span>
             </label>
         </li>
         <li class="list-group-item">
-            Dew
-            <label class="checkbox">
-                <input type="checkbox"  id='dew_check'/>
-                <span class="success"></span>
+          <label class="radio radio-gradient">
+            <label class="radio__input">
+                <input type="radio"  id='dew_check' name='var_radio' value='dew'/>
+                <span class="radio__control"></span>
+
+            </label>
+            <span class="radio__label">Dew</span>
             </label>
         </li>
         <li class="list-group-item">
-            PM2.5
-            <label class="checkbox">
-                <input type="checkbox"  id='pm25_check'/>
-                <span class="success"></span>
+          <label class="radio radio-gradient">
+            <label class="radio__input">
+                <input type="radio"  id='pm25_check' name='var_radio' value='pm25'/>
+                <span class="radio__control"></span>
+
+            </label>
+            <span class="radio__label">PM2.5</span>
             </label>
         </li>
+        <li class="list-group-item">
+          <label class="radio radio-gradient">
+            <label class="radio__input">
+                <input type="radio"  id='dew_check' name='var_radio' value='fqi_cum'/>
+                <span class="radio__control"></span>
+
+            </label>
+            <span class="radio__label">FQI</span>
+            </label>
+        </li>
+
       </div>
       <div style="margin-left:25%" id='content'>
         <!-- <div>
