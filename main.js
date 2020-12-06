@@ -113,13 +113,24 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         .style("r", "3px");
       g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.3);
     });
+    var ids = new Array();
+    ids.push('ws');
     function update(id){
       if(d3.select(id).property("checked")){
 
         id = id.slice(1, -6);
-        console.log(id);
+        ids.push(id);
+        console.log(ids);
         draw_h(fqi,city, 'Harbin', id);
         draw_l(fqi,city, id);
+      }
+      else {
+        id = id.slice(1, -6);
+        var index = ids.indexOf(id);
+        if (index > -1) {
+          ids.splice(index, 1);
+        }
+        console.log(ids);
       }
     };
     d3.select('#ws_check').on('change', function(event, d) {update('#ws_check')});
@@ -129,8 +140,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
 
-    draw_h(fqi,city, 'Harbin', 'hum');
-    draw_l(fqi,city,'hum');
+    draw_h(fqi,city, 'Harbin', 'ws');
+    draw_l(fqi,city,'ws');
 
     function draw_l(fqi,city,feature){
       g1.selectAll("*").remove();
