@@ -12,12 +12,13 @@ let g = svg.append("g")
 var defs = svg.append("defs");
 
 
+
 Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv")
 ]).then((data)=> {
   // // console.log(data);
   data1 = data[0];
   city = data[1];
-  fqi = data[2]
+  fqi = data[2];
 
   i = 0;
   parseDate = d3.timeParse("%m/%d/%Y");
@@ -70,12 +71,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
   				.data(data1.features)
   				.enter()
   				.append("path")
-  				.attr("stroke", "#000")
+  				.attr("stroke", "white")
           .attr("transform", "translate(0, 0)")
   				.attr("stroke-width", 1)
-  				.attr("fill", function (d, i) {
-  					return "steelblue";
-  				})
+  				.attr("fill", "#69b3a2")
           .attr("d", path);
 
 
@@ -126,8 +125,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     });
 
 
-    // draw_h(fqi,city, 'Harbin', 'ws');
-    // draw_l(fqi,city,'ws');
+    draw_h(fqi,city, 'Shenyang', 'fqi_cum');
+    draw_l(fqi,city,'fqi_cum');
 
     function draw_l(fqi,city,feature){
       g1.selectAll("*").remove();
@@ -346,12 +345,12 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
       //general layout information
-      var cellSize = 30;
-      var xOffset=20;
+      var cellSize = 35;
+      var xOffset=-1000;
       var yOffset=60;
       var calY=50;//offset of calendar in each group
       var calX=25;
-      var width = 960;
+      var width = 1500;
       var height = 163;
       var data = fqi.filter((d)=>{return d.city === cur_city});
       format = d3.timeFormat("%d-%m-%Y");
@@ -364,11 +363,13 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       svg_h.append("text")
         .attr("x",xOffset)
-        .attr("y",20)
+        .attr("y",0)
+        .attr("dy","1.3em")
         .text(title);
       svg_h.append("text")
         .attr("x",xOffset)
-        .attr("y",40)
+        .attr("y",20)
+        .attr("dy","1.3em")
         .text(cur_city);
 
       var cals = svg_h.selectAll("g")
@@ -426,7 +427,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("class","dayLabel")
           .attr("x",xOffset)
           .attr("y",function(d) { return calY+(i * cellSize); })
-          .attr("dy","0.9em")
+          .attr("dy","1.3em")
           .text(d);
       })
 
@@ -469,7 +470,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           monthLabels.append("text")
           .attr("class","monthLabel")
           .attr("x",monthX[i])
-          .attr("y",calY/1.2)
+          .attr("y",calY/1.9)
+          .attr("dy","1.5em")
           .text(d);
       })
 
