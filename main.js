@@ -14,7 +14,7 @@ var defs = svg.append("defs");
 
 Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv")
 ]).then((data)=> {
-  // console.log(data);
+  // // console.log(data);
   data1 = data[0];
   city = data[1];
   fqi = data[2]
@@ -77,15 +77,15 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
   let bounds = path.bounds(data1);
-  console.log(bounds);
+  // console.log(bounds);
   let map_width = bounds[1][0] - bounds[0][0];
   let map_height = bounds[1][1] - bounds[0][1];
-  console.log(map_width);
+  // console.log(map_width);
   g.selectAll("circle")
 		.data(city).enter()
     .append("circle")
     .attr('id', function(d){
-      // console.log(d.city)
+      // // console.log(d.city)
       return d.city})
 		.attr("cx", d => {return projection([d.lng, d.lat])[0]; })
 		.attr("cy", d => { return projection([d.lng, d.lat])[1]; })
@@ -95,7 +95,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     .on("mouseover", function (event, d) {
       let cur_city = this.id
       g1.selectAll("#"+cur_city).raise().transition().style("stroke","red").style('stroke-width','4').style('opacity',1);
-      // console.log(cur_city)
+      // // console.log(cur_city)
       d3.select(this)
         .transition()
         .style("fill", "white")
@@ -104,7 +104,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       // draw_l(fqi,cur_city)
 
 
-      // console.log(i.properties);
+      // // console.log(i.properties);
     })
     .on("mouseout", function (d, i) {
       let cur_city = this.id
@@ -120,7 +120,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
         id = id.slice(1, -6);
         ids.push(id);
-        console.log(ids);
+        // // console.log(ids);
         draw_h(fqi,city, 'Harbin', id);
         draw_l(fqi,city, id);
       }
@@ -130,7 +130,9 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         if (index > -1) {
           ids.splice(index, 1);
         }
-        console.log(ids);
+        // // console.log(ids);
+        // draw_h(fqi,city, 'Harbin', id);
+        // draw_l(fqi,city, id);
       }
     };
     d3.select('#ws_check').on('change', function(event, d) {update('#ws_check')});
@@ -148,7 +150,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       var margin_l = {top: 20, right: 50, bottom: 100, left: 100},
         width_l = width - margin_l.left - margin_l.right,
         height_l = height - margin_l.top - margin_l.bottom;
-        console.log(width_l)
+        // console.log(width_l)
 
       // var xScale= d3.scaleTime()
       //     .domain(d3.extent(fqi, function(d) { return d.date; }))
@@ -223,7 +225,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("stroke-width", 1.5)
           .style('opacity',0.5 )
           .attr('id', function(d){
-            // console.log(d[0].city)
+            // // console.log(d[0].city)
             return d[0].city})
           .attr("d", d3.line()
             .x(function(d) { return xScale(d.date) })
@@ -239,7 +241,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       .on("mouseover",function (event, d) {
         let cur_city = this.id
         g.selectAll("#"+cur_city).raise().transition().style("fill","white").style('r','5');
-        // console.log(cur_city)
+        // // console.log(cur_city)
         d3.select(this).raise().transition()
           .style('stroke', "red")
           .style('stroke-width','4')
@@ -248,12 +250,12 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         // draw_l(fqi,cur_city)
 
 
-        // console.log(i.properties);
+        // // console.log(i.properties);
       })
       .on("mouseout",function (event, d) {
         let cur_city = this.id
         g.selectAll("#"+cur_city).transition().style("fill","red").style('r','3');
-        // console.log(cur_city)
+        // // console.log(cur_city)
         d3.select(this).lower().transition()
           .style('stroke', "url(#line-gradient)")
           .style('stroke-width','1.5')
@@ -262,7 +264,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         // draw_l(fqi,cur_city)
 
 
-        // console.log(i.properties);
+        // // console.log(i.properties);
       })
 
       // Add the brushing
@@ -285,7 +287,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
           xScale.domain([ 4,8])
         }else{
-          console.log(extent)
+          // console.log(extent)
           xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ])
           g1.selectAll(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
         }
@@ -390,7 +392,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         .attr("transform",function(d,i){
             return "translate(0,"+(yOffset+(i*(height+calY)))+")";
         })
-      console.log(cals);
+      // console.log(cals);
       var labels = cals.append("text")
           .attr("class","yearLabel")
           .attr("x",xOffset)
@@ -401,7 +403,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("id","alldays")
           .selectAll(".day")
           .data(function(d) {
-             console.log(d);
+             // console.log(d);
              return d3.timeDay.range(new Date(parseInt(d[0]), 3, 1), new Date(parseInt(d[0]), 8, 1)); })
           .enter().append("rect")
           .attr("id",function(d) {
@@ -446,7 +448,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       cals.append("g")
       .attr("id","monthOutlines")
       .selectAll(".month")
-      .data(function(d) { console.log(d3.timeMonths(new Date(parseInt(d[0]), 0, 1), new Date(parseInt(d[0]), 8, 1)));
+      .data(function(d) { // console.log(d3.timeMonths(new Date(parseInt(d[0]), 0, 1), new Date(parseInt(d[0]), 8, 1)));
         return d3.timeMonths(new Date(parseInt(d[0]), 3, 1), new Date(parseInt(d[0]), 8, 1))})
       .enter().append("path")
       .attr("class", "month")
@@ -455,20 +457,20 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       //retreive the bounding boxes of the outlines
 
-      // console.log(document.getElementById("monthOutlines"));
+      // // console.log(document.getElementById("monthOutlines"));
       var BB = new Array();
       var mp = d3.select('#monthOutlines').node();
-      console.log(mp.childElementCount);
+      // console.log(mp.childElementCount);
       for (var i=0;i<mp.childElementCount;i++){
           BB.push(mp.children[i].getBBox());
       }
-      console.log(BB);
+      // console.log(BB);
       var monthX = new Array();
       BB.forEach(function(d,i){
           boxCentre = d.width/2;
           monthX.push(xOffset+calX+d.x+boxCentre);
       })
-      console.log(monthX);
+      // console.log(monthX);
       //create centred month labels around the bounding box of each month path
       //create day labels
       // var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -487,12 +489,12 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     var year = 2020;
     var month = d3.timeMonth.count(d3.timeYear(t0), t0);
     var t1 = new Date(year, month+1, 0);
-    console.log(t1);
+    // console.log(t1);
     var d0 = d3.timeDay.count(d3.timeSunday(t0), t0);
     var w0 = d3.timeSunday.count(d3.timeYear(t0), t0) - 12;
     var d1 = d3.timeDay.count(d3.timeSunday(t1), t1);
     var w1 = d3.timeSunday.count(d3.timeYear(t1), t1) - 12;
-    console.log((w0 + 1) * cellSize, d0 * cellSize, w0 * cellSize, 7 * cellSize, w1 * cellSize, (d1 + 1) * cellSize);
+    // // console.log((w0 + 1) * cellSize, d0 * cellSize, w0 * cellSize, 7 * cellSize, w1 * cellSize, (d1 + 1) * cellSize);
     return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
           + "H" + w0 * cellSize + "V" + 7 * cellSize
           + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
