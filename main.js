@@ -97,7 +97,9 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     .on("mouseover", function (event, d) {
       let cur_city = this.id
       g1.selectAll("#"+cur_city).raise().transition().style("stroke","red").style('stroke-width','4').style('opacity',1);
-      // // console.log(cur_city)
+      // console.log(cur_city)
+      g1.selectAll('.'+cur_city).style('opacity',1)
+
       d3.select(this)
         .transition()
         .style("fill", "white")
@@ -112,7 +114,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       d3.select(this)
         .style("fill", "red")
         .style("r", "3px");
-      g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.3);
+      g1.selectAll('.'+cur_city).style('opacity',0)
+      g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
     });
 
     function update(id, cur_city){
@@ -195,6 +198,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       var line = g1.append('g')
         .attr("clip-path", "url(#clip)")
 
+      // Create point variable
+      var point = g1.append('g')
+        .attr("clip-path", "url(#clip)")
+
 
       //Add the line
       city.forEach(x => {
@@ -206,7 +213,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("fill", "none")
           .attr("stroke", "url(#line-gradient)")
           .attr("stroke-width", 1.5)
-          .style('opacity',0.5 )
+          .style('opacity',0.2 )
           .attr('id', function(d){
             // // console.log(d[0].city)
             return d[0].city})
@@ -220,29 +227,48 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
         });
 
+
+      // add points
+      point.selectAll('.point')
+      .data(fqi)
+      .enter()
+      .append('circle')
+      .attr('class', function(d) { return d.city })
+      .attr('id', function(d){
+        return d.id
+      })
+      .attr("cx", function(d) { return xScale(d.date) })
+      .attr('cy', function(d) { return yScale(d[feature]) })
+      .attr('r', '1')
+      .style('opacity',0)
+      .style('fill', 'steelblue') 
+      .style('stroke', 'black')
+      .style('stroke-width', '2')
+
       line.selectAll('.line')
       .on("mouseover",function (event, d) {
         let cur_city = this.id
         g.selectAll("#"+cur_city).raise().transition().style("fill","white").style('r','5');
-        // // console.log(cur_city)
+        // console.log(cur_city)
+        point.selectAll('.'+cur_city).style('opacity',1)
+
         d3.select(this).raise().transition()
           .style('stroke', "red")
           .style('stroke-width','4')
           .style("opacity",'1');
 
-        // draw_l(fqi,cur_city)
-
-
-        // // console.log(i.properties);
       })
       .on("mouseout",function (event, d) {
         let cur_city = this.id
         g.selectAll("#"+cur_city).transition().style("fill","red").style('r','3');
-        // // console.log(cur_city)
+
+        // console.log(cur_city)
+        g1.selectAll('.'+cur_city).style('opacity',0)
         d3.select(this).lower().transition()
           .style('stroke', "url(#line-gradient)")
           .style('stroke-width','1.5')
-          .style("opacity",'0.3')
+          .style("opacity",'0.2')
+        
 
         // draw_l(fqi,cur_city)
 
@@ -278,7 +304,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
 
-        zoom()
+        zoom();
 
         // If user double click, reinitialize the chart
         svg.on("dblclick",function(){
@@ -291,13 +317,20 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       function zoom(){
         var t = svg.transition().duration(750);
-        xAxis.transition(t).call(d3.axisBottom(xScale))
-        line.selectAll('.line')
+        xAxis.transition(t).call(d3.axisBottom(xScale));
+        b = point.selectAll('circle')
+              .transition(t)
+              .attr("cx", function(d) { return xScale(d.date) })
+              .attr('cy', function(d) { return yScale(d[feature]) });
+        a = line.selectAll('.line')
               .transition(t)
               .attr("d", d3.line()
                 .x(function(d) { return xScale(d.date) })
                 .y(function(d) { return yScale(d[feature]) })
-              )
+              );
+
+        console.log(line);
+        console.log(b)
       }
 
 
