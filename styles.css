@@ -8,6 +8,8 @@
   box-sizing: border-box;
 }
 
+
+
 .radio {
   display: grid;
   grid-template-columns: -webkit-min-content auto;
@@ -149,4 +151,60 @@ div.tooltip {
 }
 body {background-color: rgba(247, 248, 252);
 /* opacity: 0.5; */
+}
+.container {
+  height: 500px;
+  /* margin: 10%; */
+  top: 25%;
+  left: 5%;
+  position: absolute;
+  border: 3px dashed lightgrey;
+}
+.title {
+  text-align: left;
+  /* margin: 2%; */
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.p1 {
+  font-family: Arial, Helvetica, sans-serif;
+}
+h1 {
+  font-size:3em;
+  color: darkgrey;
+}
+/* @-webkit-keyframes image_circle {
+  0%   {left:-4%; top:-3%;}
+  25%  {left:99%; top:-10%;}
+  50%  {left:99%; top:96%;}
+  75%  {left:-4%; top:100%;}
+  100% {left:-4%; top:-4%;}
+} */
+@keyframes image_circle {
+  0%   {left:-4%; top:-5%;}
+  30%  {left:99%; top:-5%;}
+  50%  {left:99%; top:96%;}
+  80%  {left:-4%; top:96%;}
+  100% {left:-4%; top:-5%;}
+}
+.image {
+  position: relative;
+  display: block;
+  opacity: 0.5;
+  fill: darkgrey;
+  width: 5%;
+  height: auto;
+  /* -webkit-animation: image_circle 4s linear infinite; */
+  animation: image_circle 6s linear infinite;
+}
+[data-aos="reverse-out"] {
+  opacity: 1;
+  transition-property: transform, opacity;
+
+  &.aos-animate {
+    opacity: 0.1;
+  }
 }

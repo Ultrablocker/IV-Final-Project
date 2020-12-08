@@ -249,6 +249,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       .style('stroke','white')
 
 
+
       line.selectAll('.line')
       .on("mouseover",function (event, d) {
         let cur_city = this.id
@@ -272,7 +273,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .style('stroke', "url(#line-gradient)")
           .style('stroke-width','1.5')
           .style("opacity",'0.2')
-        
+
 
         // draw_l(fqi,cur_city)
 
