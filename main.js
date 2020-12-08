@@ -241,7 +241,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       .attr('cy', function(d) { return yScale(d[feature]) })
       .attr('r', '1')
       .style('opacity',0)
-      .style('fill', 'steelblue') 
+      .style('fill', 'steelblue')
       .style('stroke', 'black')
       .style('stroke-width', '2')
 
@@ -268,7 +268,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .style('stroke', "url(#line-gradient)")
           .style('stroke-width','1.5')
           .style("opacity",'0.2')
-        
+
 
         // draw_l(fqi,cur_city)
 
