@@ -1,10 +1,11 @@
-let margin = 100;
+let margin = 50;
 // let gap_between_views = 150;
 let svg = d3.select('#svg_m');
 let svg_h = d3.select('#svg_h');
 let width = svg.attr("width") - margin ;
 let height = (svg.attr("height") - margin);
 var parseDate = d3.timeParse("%Y-%m-%d");
+var timeFormat = d3.timeFormat("%B %d, %Y");
 let g1 = svg.append("g")
                     .attr("transform", "translate(" + 100 + "," + 100 + ")");
 let g = svg.append("g")
@@ -61,7 +62,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
   let projection = d3.geoMercator()
-    .scale(600)
+    .scale(650)
     .center([115,40])
     // .translate([0,500]);
 
@@ -100,14 +101,21 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     .style('stroke', 'black')
     .on("mouseover", function (event, d) {
       let cur_city = this.id
-      g1.selectAll("#"+cur_city).raise().transition().style("stroke","red").style('stroke-width','4').style('opacity',1);
+      g1.selectAll('.line').style('stroke','lightgrey')
+      g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',1);
       // console.log(cur_city)
+
       g1.selectAll('.'+cur_city).style('opacity',1)
 
       d3.select(this)
-        .transition()
         .style("fill", "white")
-        .style('r', '5')
+        .style('r', '5');
+
+      div
+        .style("opacity", .9);
+      div.html(d.city)
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY -28) + "px");
     })
     .on("click", function (event, d) {
       cur_city = this.id;
@@ -115,11 +123,16 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     })
     .on("mouseout", function (d, i) {
       cur_city = this.id
+      g1.selectAll('.line').style('stroke',"url(#line-gradient)");
       d3.select(this)
         .style("fill", "red")
         .style("r", "3px");
+
+      div
+        .style("opacity", 0);
+
       g1.selectAll('.'+cur_city).style('opacity',0)
-      g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
+      g1.selectAll("#"+cur_city).style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',0.2);
     });
 
     function update(id, cur_city){
@@ -148,7 +161,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       var xScale = d3.scaleTime()
       .domain(d3.extent(fqi, function(d) { return d.date; }))
-      .range([ map_width, width_l ]);
+      .range([ map_width, width_l ])
+      .nice()
+
+
       // var xScale = d3.scaleBand()
       //     .domain(data.map(function(d) { return d.Date; }))
       //     .rangeRound([0, width], .05).padding(0.5);
@@ -175,9 +191,16 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       ))
       .selectAll("stop")
         .data([
-          {offset: "0%", color: "lightgreen"},
-          {offset: '50%', color: "orange"},
-          {offset: "100%", color: "red"}
+          {offset: "10%", color: "#2c7bb6"},
+          {offset: '20%', color: "#00a6ca"},
+          {offset: "30%", color: "#00ccbc"},
+          {offset: "40%", color: "#90eb9d"},
+          {offset: '50%', color: "#ffff00"},
+          {offset: "60%", color: "#f9d057"},
+          {offset: "70%", color: "#f29e2e"},
+          {offset: '80%', color: "#e76818"},
+          {offset: "90%", color: "#d7191c"},
+          {offset: '100%', color: "#d7191c"},
         ])
       .enter().append("stop")
         .attr("offset", function(d) { return d.offset; })
@@ -216,7 +239,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("class", "line")
           .attr("fill", "none")
           .attr("stroke", "url(#line-gradient)")
-          .attr("stroke-width", 1.5)
+          .attr("stroke-width", 4)
           .style('opacity',0.2 )
           .attr('id', function(d){
             // // console.log(d[0].city)
@@ -251,28 +274,45 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
       line.selectAll('.line')
+      .on("click", function (event, d) {
+        cur_city = this.id;
+        draw_h(fqi, city, cur_city ,d3.selectAll("input[name='var_radio']:checked").node().value)
+      })
       .on("mouseover",function (event, d) {
         let cur_city = this.id
-        g.selectAll("#"+cur_city).raise().transition().style("fill","white").style('r','5');
-        // console.log(cur_city)
-        point.selectAll('.'+cur_city).style('opacity',1)
+        g.selectAll("#"+cur_city).raise().style("fill","white").style('r','5');
+        point.selectAll('.'+cur_city).style('opacity',1);
 
-        d3.select(this).raise().transition()
-          .style('stroke', "red")
+        g1.selectAll(".line").style("stroke",'lightgrey')
+
+        d3.select(this).raise()
+          .style('stroke', "url(#line-gradient)")
           .style('stroke-width','4')
           .style("opacity",'1');
+        
+
+        div
+          .style("opacity", .9);
+        div.html(this.id)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY -28) + "px");
 
       })
       .on("mouseout",function (event, d) {
         let cur_city = this.id
-        g.selectAll("#"+cur_city).transition().style("fill","red").style('r','3');
+        g.selectAll("#"+cur_city).style("fill","red").style('r','3');
 
         // console.log(cur_city)
         g1.selectAll('.'+cur_city).style('opacity',0)
-        d3.select(this).lower().transition()
-          .style('stroke', "url(#line-gradient)")
-          .style('stroke-width','1.5')
+        d3.selectAll('.line')
           .style("opacity",'0.2')
+          .style('stroke', "url(#line-gradient)")
+          .style('stroke-width','4')
+;
+
+        div
+          .style("opacity", 0);
+          
 
 
         // draw_l(fqi,cur_city)
@@ -302,6 +342,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           xScale.domain([ 4,8])
         }else{
           // console.log(extent)
+
           xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ])
           g1.selectAll(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
         }
@@ -314,7 +355,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         // If user double click, reinitialize the chart
         svg.on("dblclick",function(){
 
-            xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]);
+            xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]).nice();
             zoom()
             });
 
@@ -347,7 +388,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       //////////// Get continuous color scale for the Rainbow ///////////////////
       ///////////////////////////////////////////////////////////////////////////
 
-      var coloursRainbow = ["#2c7bb6", "#00a6ca","#00ccbc","#90eb9d","#ffff8c","#f9d057","#f29e2e","#e76818","#d7191c"];
+      var coloursRainbow = ["#2c7bb6", "#00a6ca","#00ccbc","#90eb9d","#ffff00","#f9d057","#f29e2e","#e76818","#d7191c"];
       var colourRangeRainbow = d3.range(0, 1, 1.0 / (coloursRainbow.length - 1));
       // var colourRangeRainbow = [0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.8];
       colourRangeRainbow.push(1);
@@ -383,8 +424,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
       //general layout information
-      var cellSize = 35;
-      var xOffset=-1000;
+      var cellSize = 40;
+      var xOffset=0;
       var yOffset=60;
       var calY=50;//offset of calendar in each group
       var calX=25;
@@ -448,16 +489,18 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .style("fill", function (d,i) {
             return colorScaleRainbow(colorInterpolateRainbow(data[i][feature])) })
           .on('mouseover', function (d, i){
-            d3.select(this).transition().style("opacity", "50%");
-            g1.selectAll("#"+cur_city).raise().transition().style("stroke","red").style('stroke-width','4').style('opacity',1);
+            g1.selectAll('.line').style('stroke','lightgrey')
+            d3.select(this).style("opacity", "50%");
+            g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',1);
             a = g1.selectAll('.'+cur_city)
             .filter(function(d) {return this.id ==d3.timeParse("%d-%m-%Y")(i)})
             a.style('opacity','1')
             .style('r','5');
           })
           .on('mouseout',function (d, i){
-            d3.select(this).transition().style("opacity", "100%");
-            g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
+            g1.selectAll('.line').style('stroke','url(#line-gradient)')
+            d3.select(this).style("opacity", "100%");
+            g1.selectAll("#"+cur_city).style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
             a.style('r','3')
             .style('opacity','0')
 
