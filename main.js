@@ -6,17 +6,23 @@ let width = svg.attr("width") - margin ;
 let height = (svg.attr("height") - margin);
 var parseDate = d3.timeParse("%Y-%m-%d");
 var timeFormat = d3.timeFormat("%B %d, %Y");
+var parseDate2 = d3.timeParse("%d-%m-%Y");
+var parseDate3 = d3.timeParse("%m-%d-%Y");
 let g1 = svg.append("g")
                     .attr("transform", "translate(" + 100 + "," + 100 + ")");
 let g = svg.append("g")
 
 var defs = svg.append("defs");
-
+var format = d3.timeFormat("%m-%d-%Y");
 // Create point variable
 var point = g1.append('g')
 .attr("clip-path", "url(#clip)")
+var map_color = '#BEB7A4';
+var point_color = '#2EC0F9';
 
 
+let date_beg_high = new Date(2020, 3, 1);
+let date_end_high = new Date(2020, 9, 1);
 
 Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv")
 ]).then((data)=> {
@@ -79,7 +85,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
   				.attr("stroke", "white")
           .attr("transform", "translate(0, 0)")
   				.attr("stroke-width", 1)
-  				.attr("fill", "#69b3a2")
+  				.attr("fill", map_color)
           .attr("d", path);
 
 
@@ -97,7 +103,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 		.attr("cx", d => {return projection([d.lng, d.lat])[0]; })
 		.attr("cy", d => { return projection([d.lng, d.lat])[1]; })
 		.attr("r", "3px")
-    .style("fill", "red")
+    .style("fill", point_color)
     .style('stroke', 'black')
     .on("mouseover", function (event, d) {
       let cur_city = this.id
@@ -125,7 +131,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       cur_city = this.id
       g1.selectAll('.line').style('stroke',"url(#line-gradient)");
       d3.select(this)
-        .style("fill", "red")
+        .style("fill", point_color)
         .style("r", "3px");
 
       div
@@ -145,7 +151,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     });
 
 
-    draw_h(fqi,city, 'Shenyang', 'fqi_cum');
+    draw_h(fqi,city, 'Shenyang', 'fqi_cum', date_beg_high, date_end_high);
     draw_l(fqi,city,'fqi_cum');
 
     function draw_l(fqi,city,feature){
@@ -268,7 +274,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       .attr('cy', function(d) { return yScale(d[feature]) })
       .attr('r', '3')
       .style('opacity',0)
-      .style('fill', 'steelblue') 
+      .style('fill', 'steelblue')
       .style('stroke','white')
 
 
@@ -300,7 +306,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       })
       .on("mouseout",function (event, d) {
         let cur_city = this.id
-        g.selectAll("#"+cur_city).style("fill","red").style('r','3');
+        g.selectAll("#"+cur_city).transition().style("fill",point_color).style('r','3');
 
         // console.log(cur_city)
         g1.selectAll('.'+cur_city).style('opacity',0)
@@ -342,8 +348,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           xScale.domain([ 4,8])
         }else{
           // console.log(extent)
-
-          xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ])
+          date_beg_high = xScale.invert(extent[0]);
+          date_end_high = xScale.invert(extent[1]);
+          xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ]);
+          draw_h(fqi, city, cur_city, feature, date_beg_high, date_end_high);
+          // console.log(xScale.invert(extent[0]), xScale.invert(extent[1]))
           g1.selectAll(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
         }
         // Update axis and line position
@@ -354,8 +363,9 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
         // If user double click, reinitialize the chart
         svg.on("dblclick",function(){
-
-            xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]).nice();
+            // draw_h(fqi, city, cur_city, feature, date_beg, date_end);
+            xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]);
+            draw_h(fqi, city, cur_city, feature);
             zoom()
             });
 
@@ -375,14 +385,16 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
                 .y(function(d) { return yScale(d[feature]) })
               );
 
-        console.log(line);
-        console.log(b)
+
       }
 
 
     }
 
-    function draw_h(fqi, city, cur_city, feature){
+    function draw_h(fqi, city, cur_city, feature, date_beg_high=new Date(2020, 3, 1), date_end_high= new Date(2020, 9, 1)){
+      const date_beg = new Date(2020, 3, 1);
+      const date_end = new Date(2020, 9, 1);
+      console.log(date_beg, date_end, date_beg_high, date_end_high);
       svg_h.selectAll("*").remove();
       ///////////////////////////////////////////////////////////////////////////
       //////////// Get continuous color scale for the Rainbow ///////////////////
@@ -432,7 +444,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       var width = 1500;
       var height = 163;
       var data = fqi.filter((d)=>{return d.city === cur_city});
-      format = d3.timeFormat("%d-%m-%Y");
+      // format = d3.timeFormat("%d-%m-%Y");
       toolDate = d3.timeFormat("%d/%b/%y");
 
       var yearlyData = d3.group(data, d => d.year);
@@ -462,6 +474,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
             return "translate(0,"+(yOffset+(i*(height+calY)))+")";
         })
       // console.log(cals);
+
       var labels = cals.append("text")
           .attr("class","yearLabel")
           .attr("x",xOffset)
@@ -472,9 +485,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("id","alldays")
           .selectAll(".day")
           .data(function(d) {
-             return d3.timeDay.range(new Date(parseInt(d[0]), 3, 1), new Date(parseInt(d[0]), 8, 1)); })
+             return d3.timeDay.range(date_beg, date_end); })
           .enter().append("rect")
           .attr("id",function(d) {
+              // console.log(format(d));
               return "_"+format(d);
               //return toolDate(d.date)+":\n"+d[1]+" dead or missing";
           })
@@ -487,15 +501,25 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("y", function(d) { return calY+(d.getDay() * cellSize); })
           .datum(format)
           .style("fill", function (d,i) {
+            // console.log(data[i]);
             return colorScaleRainbow(colorInterpolateRainbow(data[i][feature])) })
           .on('mouseover', function (d, i){
             g1.selectAll('.line').style('stroke','lightgrey')
             d3.select(this).style("opacity", "50%");
             g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',1);
+            var info = data.filter((d)=>{return format(d.date) === i})[0][feature];
+            
             a = g1.selectAll('.'+cur_city)
             .filter(function(d) {return this.id ==d3.timeParse("%d-%m-%Y")(i)})
             a.style('opacity','1')
             .style('r','5');
+            div.transition()
+              .duration(100)
+              .style("opacity", .9);
+            div.html(i + '\n' + info)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY + 20) + "px");
+
           })
           .on('mouseout',function (d, i){
             g1.selectAll('.line').style('stroke','url(#line-gradient)')
@@ -503,10 +527,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
             g1.selectAll("#"+cur_city).style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
             a.style('r','3')
             .style('opacity','0')
-
+            div.transition()
+              .duration(100)
+              .style("opacity", 0);
           })
-          .append("title")
-              .text(function(d, i) { return data[i][feature]; });
+
 
       //create day labels
       var days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
@@ -528,7 +553,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       .attr("id","monthOutlines")
       .selectAll(".month")
       .data(function(d) { // console.log(d3.timeMonths(new Date(parseInt(d[0]), 0, 1), new Date(parseInt(d[0]), 8, 1)));
-        return d3.timeMonths(new Date(parseInt(d[0]), 3, 1), new Date(parseInt(d[0]), 8, 1))})
+        return d3.timeMonths(date_beg, date_end)})
       .enter().append("path")
       .attr("class", "month")
       .attr("transform","translate("+(xOffset+calX)+","+calY+")")
@@ -553,7 +578,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       //create centred month labels around the bounding box of each month path
       //create day labels
       // var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-      var months = ['APR','MAY','JUN','JUL','AUG'];
+      var months = ['APR','MAY','JUN','JUL','AUG', 'SEP'];
       var monthLabels=cals.append("g").attr("id","monthLabels")
       months.forEach(function(d,i)    {
           monthLabels.append("text")
@@ -563,6 +588,21 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("dy","1.5em")
           .text(d);
       })
+      // console.log(rects);
+      if ((date_beg.getDate() !== date_beg_high.getDate()) && (date_end.getDate() !== date_end_high.getDate())) {
+        console.log(date_beg, date_beg_high);
+        for (var i = date_beg; i <= date_beg_high; i.setDate(i.getDate() + 1)) {
+          // console.log(d3.select('#_' + format(i)));
+          d3.select('#_' + format(i))
+          .style('fill', 'lightgrey')
+        }
+        for (var i = date_end_high; i <= date_end; i.setDate(i.getDate() + 1)) {
+          // console.log(d3.select('#_' + format(i)));
+          d3.select('#_' + format(i))
+          .style('fill', 'lightgrey')
+        }
+
+      }
 
   //pure Bostock - compute and return monthly path data for any year
   function monthPath(t0) {
