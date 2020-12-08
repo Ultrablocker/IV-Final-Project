@@ -11,6 +11,10 @@ let g = svg.append("g")
 
 var defs = svg.append("defs");
 
+// Create point variable
+var point = g1.append('g')
+.attr("clip-path", "url(#clip)")
+
 
 
 Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv")
@@ -235,15 +239,16 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       .append('circle')
       .attr('class', function(d) { return d.city })
       .attr('id', function(d){
-        return d.id
+        return d.date
       })
       .attr("cx", function(d) { return xScale(d.date) })
       .attr('cy', function(d) { return yScale(d[feature]) })
-      .attr('r', '1')
+      .attr('r', '3')
       .style('opacity',0)
-      .style('fill', 'steelblue')
-      .style('stroke', 'black')
-      .style('stroke-width', '2')
+      .style('fill', 'steelblue') 
+      .style('stroke','white')
+
+
 
       line.selectAll('.line')
       .on("mouseover",function (event, d) {
@@ -426,7 +431,6 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("id","alldays")
           .selectAll(".day")
           .data(function(d) {
-             // console.log(d);
              return d3.timeDay.range(new Date(parseInt(d[0]), 3, 1), new Date(parseInt(d[0]), 8, 1)); })
           .enter().append("rect")
           .attr("id",function(d) {
@@ -445,9 +449,18 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
             return colorScaleRainbow(colorInterpolateRainbow(data[i][feature])) })
           .on('mouseover', function (d, i){
             d3.select(this).transition().style("opacity", "50%");
+            g1.selectAll("#"+cur_city).raise().transition().style("stroke","red").style('stroke-width','4').style('opacity',1);
+            a = g1.selectAll('.'+cur_city)
+            .filter(function(d) {return this.id ==d3.timeParse("%d-%m-%Y")(i)})
+            a.style('opacity','1')
+            .style('r','5');
           })
           .on('mouseout',function (d, i){
             d3.select(this).transition().style("opacity", "100%");
+            g1.selectAll("#"+cur_city).transition().style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
+            a.style('r','3')
+            .style('opacity','0')
+
           })
           .append("title")
               .text(function(d, i) { return data[i][feature]; });
