@@ -85,11 +85,12 @@
 div.tooltip {
     position: absolute;
     text-align: center;
-    width: 60px;
-    height: 28px;
+    width: 80px;
+    height: 30px;
     padding: 2px;
     font: 12px sans-serif;
-    background: rgb(243, 239, 22);
+    font-family: 'Open Sans', sans-serif;
+    background: #C4E0F9;
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
@@ -149,7 +150,7 @@ div.tooltip {
   .full-height {
   height: 100%;
 }
-body {background-color: rgba(247, 248, 252);
+body {background-color: #C4E0F9);
 /* opacity: 0.5; */
 }
 .container {
@@ -170,7 +171,7 @@ body {background-color: rgba(247, 248, 252);
   transform: translateY(-50%);
 }
 .p1 {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 h1 {
   font-size:3em;
@@ -184,11 +185,11 @@ h1 {
   100% {left:-4%; top:-4%;}
 } */
 @keyframes image_circle {
-  0%   {left:-4%; top:-5%;}
-  30%  {left:99%; top:-5%;}
-  50%  {left:99%; top:96%;}
-  80%  {left:-4%; top:96%;}
-  100% {left:-4%; top:-5%;}
+  0%   {transform: rotate(0deg); left:-4%; top:-5%;}
+  30%  {transform: rotate(40deg); left:99%; top:-5%;}
+  50%  {transform: rotate(0deg); left:99%; top:96%;}
+  80%  {transform: rotate(-40deg); left:-4%; top:96%;}
+  100% {transform: rotate(0deg); left:-4%; top:-5%;}
 }
 .image {
   position: relative;
@@ -198,7 +199,7 @@ h1 {
   width: 5%;
   height: auto;
   /* -webkit-animation: image_circle 4s linear infinite; */
-  animation: image_circle 6s linear infinite;
+  animation: image_circle 10s linear infinite;
 }
 [data-aos="reverse-out"] {
   opacity: 1;
