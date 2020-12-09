@@ -4,6 +4,14 @@ let svg = d3.select('#svg_m');
 let svg_h = d3.select('#svg_h');
 let width = svg.attr("width") - margin ;
 let height = (svg.attr("height") - margin);
+let feature_dict= {
+  'ws': "Wind Speed",
+  'hum': "Humidity",
+  'dew': "Dew",
+  'pm25': "PM 2.5",
+  'fqi_cum': "FQI",
+  
+};
 var parseDate = d3.timeParse("%Y-%m-%d");
 var timeFormat = d3.timeFormat("%B %d, %Y");
 var parseDate2 = d3.timeParse("%d-%m-%Y");
@@ -11,6 +19,7 @@ var parseDate3 = d3.timeParse("%m-%d-%Y");
 let g1 = svg.append("g")
                     .attr("transform", "translate(" + 100 + "," + 100 + ")");
 let g = svg.append("g")
+let legend_svg = svg_h.append("g")
 
 var defs = svg.append("defs");
 var format = d3.timeFormat("%m-%d-%Y");
@@ -19,6 +28,7 @@ var point = g1.append('g')
 .attr("clip-path", "url(#clip)")
 var map_color = '#BEB7A4';
 var point_color = '#2EC0F9';
+
 
 
 let date_beg_high = new Date(2020, 3, 1);
@@ -125,6 +135,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     })
     .on("click", function (event, d) {
       cur_city = this.id;
+      g1.selectAll('.line').style('stroke','lightgrey')
+      g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',1);
+      // console.log(cur_city)
+
+      g1.selectAll('.'+cur_city).style('opacity',1)
       draw_h(fqi, city, cur_city ,d3.selectAll("input[name='var_radio']:checked").node().value)
     })
     .on("mouseout", function (d, i) {
@@ -154,6 +169,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     draw_h(fqi,city, 'Shenyang', 'fqi_cum', date_beg_high, date_end_high);
     draw_l(fqi,city,'fqi_cum');
 
+
     function draw_l(fqi,city,feature){
       g1.selectAll("*").remove();
       var margin_l = {top: 20, right: 50, bottom: 100, left: 100},
@@ -164,6 +180,26 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       // var xScale= d3.scaleTime()
       //     .domain(d3.extent(fqi, function(d) { return d.date; }))
       //     .range([ map_width, width_l ]);
+      
+      // y-label
+      g1.append("text")             
+        .attr("transform",
+              "translate(" + (width_l-600) + " ," + 
+                             (height_l-450 ) + ")")
+        .style("text-anchor", "middle")
+        .style("font-size","30px")
+        // .style("font", "")
+        .text(feature_dict[feature])
+        
+
+      g1.append("text")             
+        .attr("transform",
+              "translate(" + (width_l+40) + " ," + 
+                             (height_l -10) + ")")
+        .style("text-anchor", "middle")
+        .style("font-size","30px")
+        .text('Date');
+
 
       var xScale = d3.scaleTime()
       .domain(d3.extent(fqi, function(d) { return d.date; }))
@@ -180,11 +216,48 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       // Add Y axis
       var yScale = d3.scaleLinear()
         .domain([d3.min(fqi, function(d) { return d[feature]; }), d3.max(fqi, function(d) { return d[feature]; })])
-        .range([ height_l, 0]),
-        colorScale = yScale;
+        .range([ height_l, 0])
+        .nice();
+
+      var  colorScale = yScale;
+
       yAxis = g1.append("g")
+        .attr('class', 'yAxis')
         .attr("transform", "translate("+map_width+"," + 0 + ")")
         .call(d3.axisLeft(yScale));
+
+
+      // x axis gridlines
+      function make_x_gridlines() {   
+        return d3.axisBottom(xScale)
+            .ticks(5)
+      }
+      // y axis gridlines
+      function make_y_gridlines() {   
+        return d3.axisLeft(yScale)
+            .ticks(10)
+      }
+
+
+      // add the X gridlines
+      let xGrid = g1.append("g")
+      .attr('class', 'grid')     
+      .attr("id", "grid")
+      .attr("transform", "translate(0," + height_l+ ")")
+      .style("stroke-dasharray",("3,3"))
+      .call(make_x_gridlines()
+          .tickSize(-height_l)
+          .tickFormat(""));
+
+      // add the Y gridlines
+      let yGrid = g1.append("g")
+      .attr('class', 'grid')     
+      .attr("id", "grid")
+      .attr("transform", "translate(" + width_l+ ",0)")
+      .style("stroke-dasharray",("3,3"))
+      .call(make_y_gridlines()
+          .tickSize((width_l-map_width))
+          .tickFormat(""));
 
       // Set the gradient
       g1.append("linearGradient")
@@ -197,17 +270,17 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       ))
       .selectAll("stop")
         .data([
-          {offset: "10%", color: "#2c7bb6"},
-          {offset: '20%', color: "#00a6ca"},
-          {offset: "30%", color: "#00ccbc"},
-          {offset: "40%", color: "#90eb9d"},
+          {offset: "0%", color: "#2c7bb6"},
+          {offset: '12.5%', color: "#00a6ca"},
+          {offset: "25%", color: "#00ccbc"},
+          {offset: "37.5%", color: "#90eb9d"},
           {offset: '50%', color: "#ffff00"},
-          {offset: "60%", color: "#f9d057"},
-          {offset: "70%", color: "#f29e2e"},
-          {offset: '80%', color: "#e76818"},
-          {offset: "90%", color: "#d7191c"},
-          {offset: '100%', color: "#d7191c"},
+          {offset: "62.5%", color: "#f9d057"},
+          {offset: "75%", color: "#f29e2e"},
+          {offset: '87.5%', color: "#e76818"},
+          {offset: "100%", color: "#d7191c"},
         ])
+
       .enter().append("stop")
         .attr("offset", function(d) { return d.offset; })
         .attr("stop-color", function(d) { return d.color; });
@@ -282,7 +355,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       line.selectAll('.line')
       .on("click", function (event, d) {
         cur_city = this.id;
-        draw_h(fqi, city, cur_city ,d3.selectAll("input[name='var_radio']:checked").node().value)
+        draw_h(fqi, city, cur_city ,d3.selectAll("input[name='var_radio']:checked").node().value,xScale.invert(map_width),xScale.invert(width_l-1))
       })
       .on("mouseover",function (event, d) {
         let cur_city = this.id
@@ -350,7 +423,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           // console.log(extent)
           date_beg_high = xScale.invert(extent[0]);
           date_end_high = xScale.invert(extent[1]);
-          xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ]);
+          xScale.domain([ xScale.invert(extent[0]), xScale.invert(extent[1]) ]).nice();
           draw_h(fqi, city, cur_city, feature, date_beg_high, date_end_high);
           // console.log(xScale.invert(extent[0]), xScale.invert(extent[1]))
           g1.selectAll(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
@@ -364,7 +437,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
         // If user double click, reinitialize the chart
         svg.on("dblclick",function(){
             // draw_h(fqi, city, cur_city, feature, date_beg, date_end);
-            xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]);
+            xScale.domain([d3.min(fqi, function(d) { return d.date; }),d3.max(fqi, function(d) { return d.date; })]).nice();
             draw_h(fqi, city, cur_city, feature);
             zoom()
             });
@@ -374,6 +447,11 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       function zoom(){
         var t = svg.transition().duration(750);
         xAxis.transition(t).call(d3.axisBottom(xScale));
+        xGrid
+          .call(make_x_gridlines()
+          .tickSize(-height_l)
+          .tickFormat(""));
+          
         b = point.selectAll('circle')
               .transition(t)
               .attr("cx", function(d) { return xScale(d.date) })
@@ -394,7 +472,6 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
     function draw_h(fqi, city, cur_city, feature, date_beg_high=new Date(2020, 3, 1), date_end_high= new Date(2020, 9, 1)){
       const date_beg = new Date(2020, 3, 1);
       const date_end = new Date(2020, 9, 1);
-      console.log(date_beg, date_end, date_beg_high, date_end_high);
       svg_h.selectAll("*").remove();
       ///////////////////////////////////////////////////////////////////////////
       //////////// Get continuous color scale for the Rainbow ///////////////////
@@ -436,10 +513,10 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
 
       //general layout information
-      var cellSize = 40;
-      var xOffset=0;
-      var yOffset=60;
-      var calY=50;//offset of calendar in each group
+      var cellSize = 50;
+      var xOffset=1500;
+      var yOffset=0;
+      var calY=120;//offset of calendar in each group
       var calX=25;
       var width = 1500;
       var height = 163;
@@ -449,18 +526,19 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
       var yearlyData = d3.group(data, d => d.year);
       svg_h
-         .attr("transform", "translate(" + 100 + "," + 200 + ")")
          .attr("viewBox","0 0 "+(xOffset+width)+" 1000");
 
       svg_h.append("text")
         .attr("x",xOffset)
-        .attr("y",0)
+        .attr("y",-10)
         .attr("dy","1.3em")
-        .text(title);
+        .style("font-size","30px")
+        .text(title)
       svg_h.append("text")
         .attr("x",xOffset)
         .attr("y",20)
         .attr("dy","1.3em")
+        .style("font-size","30px")
         .text(cur_city);
 
       var cals = svg_h.selectAll("g")
@@ -478,7 +556,8 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       var labels = cals.append("text")
           .attr("class","yearLabel")
           .attr("x",xOffset)
-          .attr("y",15)
+          .attr("y",85)
+          .style("font-size","25px")
           .text(function(d){return d[0]});
       //create a daily rectangle for each year
       var rects = cals.append("g")
@@ -507,12 +586,14 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
             g1.selectAll('.line').style('stroke','lightgrey')
             d3.select(this).style("opacity", "50%");
             g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',1);
-            var info = data.filter((d)=>{return format(d.date) === i})[0][feature];
             
+
             a = g1.selectAll('.'+cur_city)
-            .filter(function(d) {return this.id ==d3.timeParse("%d-%m-%Y")(i)})
+            .filter(function(d) {return this.id ==d3.timeParse("%m-%d-%Y")(i)})
             a.style('opacity','1')
             .style('r','5');
+
+            var info = data.filter((d)=>{return format(d.date) === i})[0][feature];
             div.transition()
               .duration(100)
               .style("opacity", .9);
@@ -524,7 +605,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .on('mouseout',function (d, i){
             g1.selectAll('.line').style('stroke','url(#line-gradient)')
             d3.select(this).style("opacity", "100%");
-            g1.selectAll("#"+cur_city).style("stroke","url(#line-gradient)").style('stroke-width','1.5').style('opacity',0.2);
+            g1.selectAll("#"+cur_city).style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',0.2);
             a.style('r','3')
             .style('opacity','0')
             div.transition()
@@ -542,6 +623,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("x",xOffset)
           .attr("y",function(d) { return calY+(i * cellSize); })
           .attr("dy","1.3em")
+          .style("font-size","30px")
           .text(d);
       })
 
@@ -586,6 +668,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .attr("x",monthX[i])
           .attr("y",calY/1.9)
           .attr("dy","1.5em")
+          .style("font-size","30px")
           .text(d);
       })
       // console.log(rects);
@@ -621,5 +704,26 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           + "H" + (w1 + 1) * cellSize + "V" + 0
           + "H" + (w0 + 1) * cellSize + "Z";
   }
+    // add legend
+    var legendHeight = 500
+    var legendWidth = 20
+    legend = svg_h.append('rect')
+    .attr("transform",
+            "translate(" + (1350) + " ," + 
+                           -30+ ")")
+          .attr('x1', 0)
+          .attr('y1', 0)
+          .attr('width', legendWidth)
+          .attr('height', legendHeight)
+          .style('fill', 'url(#line-gradient)');
+    // create a scale and axis for the legend
+    var legendScale = d3.scaleLinear()
+    .domain([d3.min(fqi, function(d) { return d[feature]; }), d3.max(fqi, function(d) { return d[feature]; })])
+    .range([legendHeight, 0])
+    ;
+    var legendAxis = svg_h.append("g")
+      .attr("transform", "translate("+1350+"," + -30 + ")")
+      .call(d3.axisLeft(legendScale))
+      .style("font-size","15px");
 }
 });

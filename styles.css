@@ -8,7 +8,11 @@
   box-sizing: border-box;
 }
 
-
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 1;
+  shape-rendering: crispEdges
+}
 
 .radio {
   display: grid;
@@ -150,7 +154,7 @@ div.tooltip {
   .full-height {
   height: 100%;
 }
-body {background-color: #C4E0F9);
+body {background-color: #e9f1f8;
 /* opacity: 0.5; */
 }
 .container {
