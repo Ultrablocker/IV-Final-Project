@@ -34,12 +34,14 @@ var point_color = '#2EC0F9';
 let date_beg_high = new Date(2020, 3, 1);
 let date_end_high = new Date(2020, 9, 1);
 
-Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv")
+Promise.all([d3.json("china.json"), d3.csv("city_data_with_province_utf.csv"),d3.csv("fqi_data.csv")
+, d3.csv("province_mean.csv")
 ]).then((data)=> {
   // // console.log(data);
   data1 = data[0];
   city = data[1];
   fqi = data[2];
+  province_mean = data[3];
 
   i = 0;
   parseDate = d3.timeParse("%m/%d/%Y");
@@ -66,12 +68,49 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
       //unique id for each data point
       x.id = "i" + i;
       x.city = x.city;
+      x.province = x.province;
+
   });
+
   let div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
 
+    ///////////////////////////////////////////////////////////////////////////
+    //////////// Get continuous color scale for the Rainbow ///////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
+  var coloursRainbow2 = ["#2c7bb6", "#00a6ca","#00ccbc","#90eb9d","#ffff00","#f9d057","#f29e2e","#e76818","#d7191c"];
+  // var colourRangeRainbow2 = d3.range(0, 1, 1.0 / (coloursRainbow2.length - 1));
+  var colourRangeRainbow2 = [0, 0.3, 0.4, 0.5, 0.6, 0.75, 0.8, 0.9];
+  colourRangeRainbow2.push(1);
+
+  //Create color gradient
+  var colorScaleRainbow2 = d3.scaleLinear()
+    .domain(colourRangeRainbow2)
+    .range(coloursRainbow2)
+    .interpolate(d3.interpolateHcl);
+
+  //Needed to map the values of the dataset to the color scale
+  var colorInterpolateRainbow2 = d3.scaleLinear()
+    .domain(d3.extent(province_mean, function(d) { return d['fqi_cum']; }))
+    .range([0, 1]);
+
+  ///////////////////////////////////////////////////////////////////////////
+  //////////////////// Create the Rainbow color gradient ////////////////////
+  ///////////////////////////////////////////////////////////////////////////
+
+  //Calculate the gradient
+  defs.append("linearGradient2")
+    .attr("id", "gradient-rainbow-colors2")
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "100%").attr("y2", "0%")
+    .selectAll("stop")
+    .data(coloursRainbow2)
+    .enter().append("stop")
+    .attr("offset", function(d,i) { return i/(coloursRainbow2.length-1); })
+    .attr("stop-color", function(d) { return d; });
 
 
 
@@ -87,7 +126,6 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
   path = d3.geoPath()
 				.projection(projection);
-
   g.selectAll("path")
   				.data(data1.features)
   				.enter()
@@ -95,7 +133,12 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
   				.attr("stroke", "white")
           .attr("transform", "translate(0, 0)")
   				.attr("stroke-width", 1)
-  				.attr("fill", map_color)
+  				.attr("fill", function(d, i) {
+            name = d.properties.name;
+            // console.log(name);
+            fqi_pro = province_mean.filter(d => {return d.Province === name})[0]['fqi_cum'];
+            console.log(fqi_pro);
+            return colorScaleRainbow2(colorInterpolateRainbow2(fqi_pro))})
           .attr("d", path);
 
 
@@ -368,7 +411,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
           .style('stroke', "url(#line-gradient)")
           .style('stroke-width','4')
           .style("opacity",'1');
-        
+
 
         div
           .style("opacity", .9);
@@ -391,7 +434,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
 
         div
           .style("opacity", 0);
-          
+
 
 
         // draw_l(fqi,cur_city)
@@ -586,7 +629,7 @@ Promise.all([d3.json("china.json"), d3.csv("city_data.csv"),d3.csv("fqi_data.csv
             g1.selectAll('.line').style('stroke','lightgrey')
             d3.select(this).style("opacity", "50%");
             g1.selectAll("#"+cur_city).raise().style("stroke","url(#line-gradient)").style('stroke-width','4').style('opacity',1);
-            
+            var info = data.filter((d)=>{return format(d.date) === i})[0][feature];
 
             a = g1.selectAll('.'+cur_city)
             .filter(function(d) {return this.id ==d3.timeParse("%m-%d-%Y")(i)})

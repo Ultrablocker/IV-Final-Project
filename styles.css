@@ -13,6 +13,8 @@
   stroke-opacity: 1;
   shape-rendering: crispEdges
 }
+*{font-family: 'Aldrich', sans-serif;}
+
 
 .radio {
   display: grid;
@@ -93,7 +95,7 @@ div.tooltip {
     height: 30px;
     padding: 2px;
     font: 12px sans-serif;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Aldrich', sans-serif;
     background: #C4E0F9;
     border: 0px;
     border-radius: 8px;
@@ -102,7 +104,7 @@ div.tooltip {
 
   body {
   		  	font-size: 1rem;
-  		  	font-family: 'Open Sans', sans-serif;
+  		  	font-family: 'Aldrich', sans-serif;
   		  	font-weight: 500;
   		  	fill: #7A7A7A;
   		  	text-align: center;
@@ -111,9 +113,7 @@ div.tooltip {
 
 
 
-  body {
-      margin: 0px;
-  }
+
   .sphere{
       fill: lightgrey;
   }
@@ -132,7 +132,7 @@ div.tooltip {
       stroke: #ccc;
   }
   text    {
-      font-family:sans-serif;
+      /* font-family:sans-serif; */
       font-size:1.5em;
   }
   .dayLabel   {
@@ -175,11 +175,16 @@ body {background-color: #e9f1f8;
   transform: translateY(-50%);
 }
 .p1 {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Aldrich', sans-serif;
 }
 h1 {
   font-size:3em;
   color: darkgrey;
+}
+h3 {
+  font-size:2em;
+  color: darkgrey;
+  font-family: 'Aldrich', sans-serif;
 }
 /* @-webkit-keyframes image_circle {
   0%   {left:-4%; top:-3%;}
